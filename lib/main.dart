@@ -12,7 +12,8 @@ void main() {
       theme: ThemeData(
         primarySwatch: Colors.grey,
       ),
-      home: ProductDetailPage()//ProductListPage()
+      home: ProductDetailPage(),
+    debugShowCheckedModeBanner: false,
   ));
 }
 

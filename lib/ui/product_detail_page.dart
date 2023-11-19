@@ -22,8 +22,32 @@ class ProductDetailPage extends StatelessWidget {
             body: Padding(
               padding: const EdgeInsets.only(top: 60, bottom: 10),
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
+                    controller.cartListController.products.isNotEmpty ?
+                    Align(
+                      alignment: Alignment.topRight,
+                      child: GestureDetector(
+                          onTap: () {
+
+                          },
+                          child: Container(
+                            height: 50,
+                            width: 50,
+                            margin: const EdgeInsets.only(right: 30),
+                            decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: const BorderRadius.all(Radius.circular(10)),
+                                border: Border.all(color: Colors.grey.shade400)
+                            ),
+                            child: Center(
+                              child: Badge(
+                                label: Text(controller.cartListController.products.length.toString()),
+                                child: const Icon(Icons.shopping_cart, color: Colors.black,size: 25,)),
+                            ),
+                          )),
+                    ) : Container(),
+                    // !controller.isDetailVisible ? const Spacer() : Container(),
                 Stack(
                   alignment: Alignment.center,
                     children: [
@@ -39,16 +63,24 @@ class ProductDetailPage extends StatelessWidget {
                                 controller.product.color?.length ?? 0,
                                 (index) => Hero(
                                   tag: "product",
-                                  child: ModelViewer(
-                                    loading: null,
-                                        backgroundColor: Colors.grey.shade100,
-                                        src: controller.product.color?[index].image ??
-                                            'assets/egg_black.glb',
-                                        autoRotate: true,
-                                        disableZoom: true,
-                                      disableTap: true,
-                                      ar: false,
-                                      ),
+                                  child: Stack(
+                                    children: [
+                                      ModelViewer(
+                                            backgroundColor: Colors.grey.shade100,
+                                            src: controller.product.color?[index].image ??
+                                                'assets/egg_black.glb',
+                                            autoRotate: true,
+                                            disableZoom: true,
+                                          disableTap: true,
+                                          ar: false,
+                                          ),
+                                      Container(
+                                        height: 8,
+                                        width: Get.width,
+                                        color: Colors.grey.shade100,
+                                      )
+                                    ],
+                                  ),
                                 )
                             ),
                           )),
@@ -76,7 +108,7 @@ class ProductDetailPage extends StatelessWidget {
                       const Padding(
                         padding: EdgeInsets.only(top: 20),
                         child: Text(
-                          "Select a Color",
+                          "Color",
                           style: TextStyle(
                               fontSize: 18,
                               color: Colors.black,
@@ -132,7 +164,7 @@ class ProductDetailPage extends StatelessWidget {
                                     ))),
                       ),
                       const Text(
-                        "Select Size",
+                        "Size",
                         style: TextStyle(
                             fontSize: 18,
                             color: Colors.black,
@@ -191,7 +223,13 @@ class ProductDetailPage extends StatelessWidget {
                       ),
                       MaterialButton(
                         onPressed: () {
-                          _showCheckoutDialog(context, );
+                          if(controller.product.color?.every((color) => !color.isSelected) ?? false) {
+                            Get.snackbar("Color", "Please select color first", snackPosition: SnackPosition.BOTTOM);
+                            return;
+                          }
+
+                          _showCheckoutDialog(context);
+                          productDetailController.addToCart();
                         },
                         color: Colors.grey,
                         elevation: 5,
@@ -221,12 +259,12 @@ class ProductDetailPage extends StatelessWidget {
         return AlertDialog(
           title: Row(
             children: [
-              Spacer(),
+              const Spacer(),
               InkWell(
                 onTap: () {
                   Get.back();
                 },
-                  child: Icon(Icons.clear))
+                  child: const Icon(Icons.clear))
             ],
           ),
           content: SizedBox(
@@ -238,14 +276,23 @@ class ProductDetailPage extends StatelessWidget {
                   height: 350,
                   child: Hero(
                     tag: "product",
-                    child: ModelViewer(
-                      backgroundColor: Colors.white,
-                      src: productDetailController.product.color?[productDetailController.selectedColorIndex].image ??
-                          'assets/egg_black.glb',
-                      autoRotate: true,
-                      disableZoom: true,
-                      disableTap: true,
-                      ar: false,
+                    child: Stack(
+                      children: [
+                        ModelViewer(
+                          backgroundColor: Colors.white,
+                          src: productDetailController.product.color?[productDetailController.selectedColorIndex].image ??
+                              'assets/egg_black.glb',
+                          autoRotate: true,
+                          disableZoom: true,
+                          disableTap: true,
+                          ar: false,
+                        ),
+                        Container(
+                          height: 10,
+                          width: Get.width-60,
+                          color: Colors.white,
+                        )
+                      ],
                     ),
                   ),
                 ),
@@ -261,7 +308,7 @@ class ProductDetailPage extends StatelessWidget {
                 Get.back();
                 _showCreditForm(context);
               },
-              child: Text('Checkout', style: TextStyle(color: Colors.white),),
+              child: const Text('Checkout', style: TextStyle(color: Colors.white),),
             ),
           ],
         );
@@ -274,18 +321,18 @@ class ProductDetailPage extends StatelessWidget {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Credit Form'),
+          title: const Text('Credit Form'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               TextFormField(
-                decoration: InputDecoration(labelText: 'Credit Card Number'),
+                decoration: const InputDecoration(labelText: 'Credit Card Number'),
               ),
               TextFormField(
-                decoration: InputDecoration(labelText: 'CVV Number'),
+                decoration: const InputDecoration(labelText: 'CVV Number'),
               ),
               TextFormField(
-                decoration: InputDecoration(labelText: 'Expiry Date'),
+                decoration: const InputDecoration(labelText: 'Expiry Date'),
               ),
               // Add other form fields as needed
               const SizedBox(height: 20),
@@ -294,6 +341,7 @@ class ProductDetailPage extends StatelessWidget {
                 onPressed: () {
                   Get.back();
                   _showThankYouDialog(context);
+                  productDetailController.clearCart();
                 },
                 child: const Text('Purchase Now', style: TextStyle(color: Colors.white),),
               ),
@@ -319,7 +367,7 @@ class ProductDetailPage extends StatelessWidget {
                   productDetailController.isDetailVisible = false;
                   Get.back();
                 },
-                child: Text('Close', style: TextStyle(color: Colors.white),),
+                child: const Text('Close', style: TextStyle(color: Colors.white),),
               ),
             ),
           ],

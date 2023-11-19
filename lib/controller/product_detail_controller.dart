@@ -9,6 +9,8 @@ class ProductDetailController extends GetxController{
   ProductDetailController(){
     currentAnimation = product.image;
   }
+  CartListController cartListController  = Get.find();
+
 
   final PageController pageController = PageController();
 
@@ -72,16 +74,8 @@ class ProductDetailController extends GetxController{
   }
 
   addToCart() {
-    if(product.color?.every((color) => !color.isSelected) ?? false) {
-      Get.snackbar("Color", "Please select color first", snackPosition: SnackPosition.BOTTOM);
-      return;
-    }
 
-    isLoading = true;
-    update();
-    Future.delayed(const Duration(seconds: 3), () {
-      CartListController controller = Get.find();
-      controller.products.add(
+      cartListController.addToCart(
           Product(
               name: product.name,
               image: product.color?.firstWhere((color) => color.isSelected).image,
@@ -92,11 +86,14 @@ class ProductDetailController extends GetxController{
           )
       );
 
-      isLoading = false;
-      isDetailVisible = false;
-      Get.snackbar("Item added to cart", "", snackPosition: SnackPosition.BOTTOM);
-    });
-
+      update();
   }
+
+  clearCart() {
+    cartListController.clear();
+    update();
+  }
+
+
 
 }
